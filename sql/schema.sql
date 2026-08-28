@@ -21,3 +21,21 @@ INSERT IGNORE INTO estudiantes (nombre, carnet) VALUES
     ('Ana Lopez', '2024001'),
     ('Carlos Perez', '2024002'),
     ('Maria Gonzalez', '2024003');
+
+
+-- Tarea Proga2: Modificaciones a la estructura de la base de datos
+-- 1. Agregar campo ACTIVO (1 = Activo, 0 = Inactivo)
+ALTER TABLE estudiantes 
+ADD COLUMN activo TINYINT(1) NOT NULL DEFAULT 1;
+
+-- 2. Agregar campo TIPO
+ALTER TABLE estudiantes 
+ADD COLUMN tipo VARCHAR(20) NOT NULL DEFAULT 'Pregrado';
+
+-- 3. Agregar campo EMAIL
+ALTER TABLE estudiantes 
+ADD COLUMN email VARCHAR(100) UNIQUE;
+
+-- Agregar restricción para validar que el correo tenga formato básico de email
+ALTER TABLE estudiantes 
+ADD CONSTRAINT chk_email CHECK (email LIKE '%@%.%');
