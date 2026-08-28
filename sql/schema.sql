@@ -39,3 +39,19 @@ ADD COLUMN email VARCHAR(100) UNIQUE;
 -- Agregar restricción para validar que el correo tenga formato básico de email
 ALTER TABLE estudiantes 
 ADD CONSTRAINT chk_email CHECK (email LIKE '%@%.%');
+
+
+-- 1. Agregar/actualizar el correo a un estudiante ya registrado (por carnet)
+UPDATE estudiantes 
+SET email = 'ana.lopez@estudiante.edu.gt' 
+WHERE carnet = '2024001';
+
+-- 2. Cambiar el estado de un estudiante a Inactivo (activo = 0)
+UPDATE estudiantes 
+SET activo = 0 
+WHERE carnet = '2024002';
+
+-- 3. Cambiar el tipo de otro registro (por ejemplo, a Postgrado)
+UPDATE estudiantes 
+SET tipo = 'Postgrado' 
+WHERE carnet = '2024003';
