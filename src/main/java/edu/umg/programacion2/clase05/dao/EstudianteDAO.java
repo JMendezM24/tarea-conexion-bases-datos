@@ -31,13 +31,16 @@ public class EstudianteDAO {
 
     // 1. CREATE: inserta un estudiante nuevo y retorna el id que le asigno MySQL.
     public int crear(Estudiante estudiante) throws SQLException {
-        String sql = "INSERT INTO estudiantes (nombre, carnet) VALUES (?, ?)";
+        String sql = "INSERT INTO estudiantes (nombre, carnet, activo, tipo, email) VALUES (?, ?, ?, ?, ?)";
 
         try (Connection conexion = DriverManager.getConnection(URL, USUARIO, PASSWORD);
              PreparedStatement statement = conexion.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             statement.setString(1, estudiante.getNombre());
             statement.setString(2, estudiante.getCarnet());
+            statement.setBoolean(3, estudiante.isActivo());
+            statement.setString(4, estudiante.getTipo());
+            statement.setString(5, estudiante.getEmail());
             statement.executeUpdate();
 
             // IMPORTANTE: RETURN_GENERATED_KEYS + getGeneratedKeys() es como se
@@ -54,7 +57,7 @@ public class EstudianteDAO {
 
     // 2. READ (todos): retorna la lista completa de estudiantes.
     public List<Estudiante> listarTodos() throws SQLException {
-        String sql = "SELECT id, nombre, carnet FROM estudiantes ORDER BY id";
+        String sql = "SELECT id, nombre, carnet, activo, tipo, email FROM estudiantes ORDER BY id";
         List<Estudiante> estudiantes = new ArrayList<>();
 
         try (Connection conexion = DriverManager.getConnection(URL, USUARIO, PASSWORD);
@@ -72,12 +75,30 @@ public class EstudianteDAO {
     // null "silencioso" cuando no se encuentra nada; obliga a quien llama este
     // metodo a manejar explicitamente el caso "no existe".
     public Optional<Estudiante> buscarPorCarnet(String carnet) throws SQLException {
-        String sql = "SELECT id, nombre, carnet FROM estudiantes WHERE carnet = ?";
+        String sql = "SELECT id, nombre, carnet, activo, tipo, email FROM estudiantes WHERE carnet = ?";
 
         try (Connection conexion = DriverManager.getConnection(URL, USUARIO, PASSWORD);
              PreparedStatement statement = conexion.prepareStatement(sql)) {
 
             statement.setString(1, carnet);
+
+            try (ResultSet resultado = statement.executeQuery()) {
+                if (resultado.next()) {
+                    return Optional.of(mapearFila(resultado));
+                }
+                return Optional.empty();
+            }
+        }
+    }
+
+    // 3b. READ (por email): busca un estudiante por su correo electronico.
+    public Optional<Estudiante> buscarPorEmail(String email) throws SQLException {
+        String sql = "SELECT id, nombre, carnet, activo, tipo, email FROM estudiantes WHERE email = ?";
+
+        try (Connection conexion = DriverManager.getConnection(URL, USUARIO, PASSWORD);
+             PreparedStatement statement = conexion.prepareStatement(sql)) {
+
+            statement.setString(1, email);
 
             try (ResultSet resultado = statement.executeQuery()) {
                 if (resultado.next()) {
@@ -125,6 +146,9 @@ public class EstudianteDAO {
         int id = resultado.getInt("id");
         String nombre = resultado.getString("nombre");
         String carnet = resultado.getString("carnet");
-        return new Estudiante(id, nombre, carnet);
+        boolean activo = resultado.getBoolean("activo");
+        String tipo = resultado.getString("tipo");
+        String email = resultado.getString("email");
+        return new Estudiante(id, nombre, carnet, activo, tipo, email);
     }
 }
