@@ -45,19 +45,22 @@ public class Main {
                     buscarEstudiante();
                     break;
                 case 4:
-                    actualizarEstudiante();
+                    buscarEstudiantePorEmail();
                     break;
                 case 5:
-                    eliminarEstudiante();
+                    actualizarEstudiante();
                     break;
                 case 6:
+                    eliminarEstudiante();
+                    break;
+                case 7:
                     System.out.println("Hasta luego.");
                     break;
                 default:
                     System.out.println("Opcion invalida. Intenta de nuevo.");
             }
             System.out.println();
-        } while (opcion != 6);
+        } while (opcion != 7);
 
         teclado.close();
     }
@@ -67,9 +70,10 @@ public class Main {
         System.out.println("1. Agregar estudiante");
         System.out.println("2. Listar todos los estudiantes");
         System.out.println("3. Buscar estudiante por carnet");
-        System.out.println("4. Actualizar nombre de un estudiante");
-        System.out.println("5. Eliminar estudiante");
-        System.out.println("6. Salir");
+        System.out.println("4. Buscar estudiante por email");
+        System.out.println("5. Actualizar nombre de un estudiante");
+        System.out.println("6. Eliminar estudiante");
+        System.out.println("7. Salir");
         System.out.print("Elige una opcion: ");
     }
 
@@ -92,9 +96,18 @@ public class Main {
         String nombre = teclado.nextLine();
         System.out.print("Carnet: ");
         String carnet = teclado.nextLine();
+        System.out.print("Email: ");
+        String email = teclado.nextLine();
+        System.out.print("Tipo (Pregrado/Postgrado) [Default: Pregrado]: ");
+        String tipo = teclado.nextLine();
+        if (tipo.trim().isEmpty()) {
+            tipo = "Pregrado";
+        }
 
         try {
-            int id = estudianteDAO.crear(new Estudiante(nombre, carnet));
+            // Se crea el objeto pasando los atributos capturados
+            Estudiante nuevoEstudiante = new Estudiante(0, nombre, carnet, true, tipo, email);
+            int id = estudianteDAO.crear(nuevoEstudiante);
             System.out.println("Estudiante creado con id " + id);
         } catch (SQLException e) {
             // Cuidado: nunca dejen un catch vacio. Como minimo, impriman el
@@ -132,6 +145,22 @@ public class Main {
             }
         } catch (SQLException e) {
             System.err.println("Error al buscar el estudiante: " + e.getMessage());
+        }
+    }
+
+    private static void buscarEstudiantePorEmail() {
+        System.out.print("Email a buscar: ");
+        String email = teclado.nextLine();
+
+        try {
+            Optional<Estudiante> estudiante = estudianteDAO.buscarPorEmail(email);
+            if (estudiante.isPresent()) {
+                System.out.println("Encontrado: " + estudiante.get());
+            } else {
+                System.out.println("No existe ningun estudiante con ese email.");
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al buscar el estudiante por email: " + e.getMessage());
         }
     }
 
